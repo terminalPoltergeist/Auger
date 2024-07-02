@@ -6,6 +6,7 @@ function Clear-LaugerContext {
         Application     = $null
         Host            = $null
         Source          = $null
+        LogFile         = $null
 
         LogStreams = @(
             [pscustomobject]@{
@@ -17,7 +18,6 @@ function Clear-LaugerContext {
                 SMTPSSL     = $true
                 Verbosity   = $null
                 LogType     = $null
-                Summary     = $null
             }
             [pscustomobject]@{
                 Name        = 'Slack'
@@ -25,7 +25,6 @@ function Clear-LaugerContext {
                 Webhook     = $null
                 Verbosity   = $null
                 LogType     = $null
-                Summary     = $null
             }
             [pscustomobject]@{
                 Name        = 'Splunk'
@@ -34,7 +33,6 @@ function Clear-LaugerContext {
                 Headers     = $null
                 Verbosity   = $null
                 LogType     = $null
-                Summary     = $null
             }
         )
     }
