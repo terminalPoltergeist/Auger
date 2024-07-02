@@ -20,11 +20,15 @@ function Write-Lauger {
         [switch]$IsWarning
     )
 
-    $EnabledLogStreams = $LaugerContext.LogStreams
+    $EnabledLogStreams = $LaugerContext.LogStreams | Where-Object -Property Enabled -eq $true
 
-    if ($IsError) {
-        Write-Error $Message
+    foreach ($stream in $EnabledLogStreams) {
+        $stream.Summary += "$Message`n"
     }
-    $InformationPreference = 'Continue'
-    Write-Information $Message
+
+#     if ($IsError) {
+#         Write-Error $Message
+#     }
+#     $InformationPreference = 'Continue'
+#     Write-Information $Message
 }

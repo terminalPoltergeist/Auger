@@ -23,6 +23,7 @@ $LaugerContext = [pscustomobject]@{
     Application     = $null
     Host            = $null
     Source          = $null
+    LogFile         = $null
 
     LogStreams = @(
         [pscustomobject]@{
@@ -34,7 +35,6 @@ $LaugerContext = [pscustomobject]@{
             SMTPSSL     = $true
             Verbosity   = $null
             LogType     = $null
-            Summary     = $null
         }
         [pscustomobject]@{
             Name        = 'Slack'
@@ -42,7 +42,6 @@ $LaugerContext = [pscustomobject]@{
             Webhook     = $null
             Verbosity   = $null
             LogType     = $null
-            Summary     = $null
         }
         [pscustomobject]@{
             Name        = 'Splunk'
@@ -51,7 +50,6 @@ $LaugerContext = [pscustomobject]@{
             Headers     = $null
             Verbosity   = $null
             LogType     = $null
-            Summary     = $null
         }
     )
 }

@@ -35,7 +35,7 @@ function New-LaugerContext {
         Verbose - Send all logs to Splunk.
     .PARAMETER SplunkLogType
         How to send logs to Splunk.
-        Summary constructs a single log sumarry and sends it at the end of the logging session (must use Close-LaugerSession).
+        Summary sends the contents of $LaugerContext.LogFile at the end of the log session (must use Close-LaugerSession).
         AdHoc sends logs as they're recieved by Lauger through Write-LaugerLog.
     .PARAMETER SlackVerbosity
         Logging level for Slack.
@@ -46,7 +46,7 @@ function New-LaugerContext {
         Verbose - Send all logs to Slack.
     .PARAMETER SlackLogType
         How to send logs to Slack.
-        Summary constructs a single log sumarry and sends it at the end of the logging session (must use Close-LaugerSession).
+        Summary sends the contents of $LaugerContext.LogFile at the end of the log session (must use Close-LaugerSession).
         AdHoc sends logs as they're recieved by Lauger through Write-LaugerLog.
     .PARAMETER EmailVerbosity
         Logging level for Email.
@@ -57,7 +57,7 @@ function New-LaugerContext {
         Verbose - Send all logs to email.
     .PARAMETER EmailLogType
         How to send logs to email.
-        Summary constructs a single log sumarry and sends it at the end of the logging session (must use Close-LaugerSession).
+        Summary sends the contents of $LaugerContext.LogFile at the end of the log session (must use Close-LaugerSession).
         AdHoc sends logs as they're recieved by Lauger through Write-LaugerLog.
     .PARAMETER LogVerbosity
         Logging level to use for all output streams. Defaults to Error.
@@ -70,8 +70,8 @@ function New-LaugerContext {
         Verbose - Send all logs.
     .PARAMETER LogType
         Default method for sending logs to all log streams. Defaults to Summary.
-        Summary constructs a single log sumarry and sends it at the end of the logging session (must use Close-LaugerSession).
-        AdHoc sends logs as they're recieved by Lauger through Write-LaugerLog.
+        Summary sends the contents of $LaugerContext.LogFile at the end of the log session (must use Close-LaugerSession).
+        AdHoc sends logs as they're recieved by Lauger through Write-Lauger.
     #>
     param (
         [Parameter(Mandatory = $true)]
@@ -139,6 +139,9 @@ function New-LaugerContext {
     $LaugerContext.Source = $Source
     Write-Verbose "Lauger Source [$Source]"
 
+    $LaugerContext.LogFile = New-TemporaryFile
+    Write-Verbose "Created log file at $($LaugerContext.LogFile.FullName)"
+
     if ($LogVerbosity) {
         foreach ($stream in $LaugerContext.LogStreams) {$stream.Verbosity = $LogVerbosity }
         Write-Verbose "Setting Lauger default log verbosity [$LogVerbosity]"
@@ -147,7 +150,6 @@ function New-LaugerContext {
     if ($LogType) {
         foreach ($stream in $LaugerContext.LogStreams) {
             $stream.LogType = $LogType
-            if ($LogType -eq 'Summary') { $stream.Summary = '' }
         }
         Write-Verbose "Setting Lauger default log type [$LogType]"
     }
@@ -167,7 +169,6 @@ function New-LaugerContext {
         }
         if ($EmailLogType) {
             ($LaugerContext.LogStreams | Where-Object -Property Name -eq 'Email').LogType = $EmailLogType
-            if ($EmailLogType -eq 'Summary') { $LaugerContext.LogStreams.Email.Summary = '' }
             Write-Verbose "Setting Lauger log stream [Email] log type [$EmailLogType]"
         }
     }
@@ -184,11 +185,6 @@ function New-LaugerContext {
         }
         if ($SlackLogType) {
             ($LaugerContext.LogStreams | Where-Object -Property Name -eq 'Slack').LogType = $SlackLogType
-            if ($SlackLogType -eq 'Summary') {
-                ($LaugerContext.LogStreams | Where-Object -Property Name -eq 'Slack').Summary = ''
-            } else {
-                ($LaugerContext.LogStreams | Where-Object -Property Name -eq 'Slack').Summary = $null
-            }
             Write-Verbose "Setting Lauger log stream [Slack] log type [$SlackLogType]"
         }
     }
@@ -208,7 +204,6 @@ function New-LaugerContext {
         }
         if ($SplunkLogType) {
             ($LaugerContext.LogStreams | Where-Object -Property Name -eq 'Splunk').LogType = $SplunkLogType
-            if ($SplunkLogType -eq 'Summary') { ($LaugerContext.LogStreams | Where-Object -Property Name -eq 'Splunk').Summary = '' }
             Write-Verbose "Setting Lauger log stream [Splunk] log type [$SplunkLogType]"
         }
     }
