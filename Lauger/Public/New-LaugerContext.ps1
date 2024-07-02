@@ -21,6 +21,7 @@ function New-LaugerContext {
         The http webhook endpoint for the Splunk collector.
     .PARAMETER SplunkAuthKey
         A SecureString containing an authorization key in the format "Splunk <token>".
+        Will be stored as a SecureString in $LaugerContext.LogStreams.Splunk.Headers.Authorization.
     .PARAMETER SplunkVerbosity
         Logging level for Splunk.
 
@@ -128,7 +129,7 @@ function New-LaugerContext {
         Write-Verbose "LaugerContext for application [$Application]"
     }
     $LaugerContext.Host = if ($env:COMPUTERNAME) {$env:COMPUTERNAME} else {Hostname}
-    Write-Verbose "LaugerContext for host [$LaugerContext.Host]"
+    Write-Verbose "LaugerContext for host [$($LaugerContext.Host)]"
 
     if ($LogVerbosity) {
         foreach ($stream in $LaugerContext.LogStreams.Keys) {$LaugerContext.LogStreams[$stream].Verbosity = $LogVerbosity}
@@ -146,7 +147,7 @@ function New-LaugerContext {
     if ($enableEmail) {
         if ($SMTPPort) {$LaugerContext.LogStreams.Mail.SMTPPort = $SMTPPort}
         if ($SMTPSSL) {$LaugerContext.LogStreams.Mail.SMTPSSL = $SMTPSSL}
-        $LaugerContext.LogStreams.Email.Enabled = $true
+        $LaugerContext.LogStreams.Mail.Enabled = $true
         Write-Verbose "Enabled Lauger log stream [Email]"
 
         if ($EmailVerbosity) {
@@ -178,7 +179,7 @@ function New-LaugerContext {
     $enableSplunk = $true
     if ($SplunkURI) {$LaugerContext.LogStreams.Splunk.Uri = $SplunkURI} else {$enableSplunk = $false}
     if ($SplunkAuthKey) {
-        $LaugerContext.LogStreams.Splunk.Headers['authorization'] = $([Net.NetworkCredential]::new('', $SplunkAuthKey).Password)
+        $LaugerContext.LogStreams.Splunk.Headers = @{Authorization = $SplunkAuthKey}
     } else {$enableSplunk = $false}
     if ($enableSplunk) {
         $LaugerContext.LogStreams.Splunk.Enabled = $true
@@ -193,5 +194,5 @@ function New-LaugerContext {
             Write-Verbose "Setting Lauger log stream [Splunk] log type [$SplunkLogType]"
         }
     }
-    LaugerLaugerContext
+    return $LaugerContext
 }
