@@ -3,7 +3,7 @@ function Write-Lauger {
     .DESCRIPTION
         This function consumes log information from a script, formats and writes logs to each configured LogStream.
         Use it in place of Write-Warning, Write-Error, etc.
-        Write-Lauger will handle writing logs to the host STDOUT stream.
+        Write-Lauger will handle writing logs to the host output stream.
     .PARAMETER Message
         The message to log.
     .PARAMETER IsWarning
@@ -11,17 +11,16 @@ function Write-Lauger {
     .PARAMETER IsError
         Used to log the message as an error. Will send to LogStreams if Verbosity is not Quiet.
         Terminates the process if $ErrorAction is not overridden.
-    .PARAMETER SourceType
-        Name for the source type the log originates from.
     #>
     [CmdletBinding()]
     param (
         [Parameter(Position = 0, Mandatory = $true)]
         [string]$Message,
         [switch]$IsError,
-        [switch]$IsWarning,
-        [string]$SourceType
+        [switch]$IsWarning
     )
+
+    $EnabledLogStreams = $LaugerContext.LogStreams
 
     if ($IsError) {
         Write-Error $Message
