@@ -1,7 +1,7 @@
 @{
 
 # Script module or binary module file associated with this manifest.
-RootModule = './Sentinel.psm1'
+RootModule = './Lauger.psm1'
 
 # Version number of this module.
 ModuleVersion = '0.1.0'
@@ -10,19 +10,19 @@ ModuleVersion = '0.1.0'
 # CompatiblePSEditions = @()
 
 # ID used to uniquely identify this module
-GUID = '9d81ca15-7baa-435a-a198-ff49c4725c21'
+GUID = '74a4a285-300a-484b-9515-d15f1c757920'
 
 # Author of this module
-Author = 'UMN-Automation-Community'
+Author = 'Jack Nemitz'
 
 # Company or vendor of this module
-CompanyName = 'University of Minnesota'
+# CompanyName = 'Unknown'
 
 # Copyright statement for this module
-Copyright = '(c) University of Minnesota. All rights reserved.'
+Copyright = '(c) Jack Nemitz. All rights reserved.'
 
 # Description of the functionality provided by this module
-Description = 'Functions for logging and messaging within Powershell scripts.'
+Description = 'A Powershell logging library designed for automation.'
 
 # Minimum version of the PowerShell engine required by this module
 # PowerShellVersion = ''
@@ -61,7 +61,7 @@ Description = 'Functions for logging and messaging within Powershell scripts.'
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-# FunctionsToExport = @()
+FunctionsToExport = @()
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()

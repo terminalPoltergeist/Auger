@@ -1,9 +1,9 @@
-function Write-SentinelLog {
+function Write-Lauger {
     <#
     .DESCRIPTION
         This function consumes log information from a script, formats and writes logs to each configured LogStream.
         Use it in place of Write-Warning, Write-Error, etc.
-        Write-SentinelLog will handle writing logs to the host STDOUT stream.
+        Write-Lauger will handle writing logs to the host STDOUT stream.
     .PARAMETER Message
         The message to log.
     .PARAMETER IsWarning
@@ -12,7 +12,7 @@ function Write-SentinelLog {
         Used to log the message as an error. Will send to LogStreams if Verbosity is not Quiet.
         Terminates the process if $ErrorAction is not overridden.
     .PARAMETER SourceType
-        Name for the source type the log originates from. Defaults to 'AzureRunbook'
+        Name for the source type the log originates from.
     #>
     [CmdletBinding()]
     param (
@@ -20,7 +20,7 @@ function Write-SentinelLog {
         [string]$Message,
         [switch]$IsError,
         [switch]$IsWarning,
-        [string]$SourceType = 'AzureRunbook'
+        [string]$SourceType
     )
 
     if ($IsError) {

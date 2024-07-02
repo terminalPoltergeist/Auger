@@ -1,10 +1,10 @@
-function New-SentinelContext {
+function New-LaugerContext {
     <#
     .SYNOPSIS
         Initialize a messaging and logging context.
     .DESCRIPTION
         This function initializes the module's namespace variables.
-        The variable mapping can be found in the module's root .psm1 file. It is called $SentinelContext.
+        The variable mapping can be found in the module's root .psm1 file. It is called $LaugerContext.
     .PARAMETER Application
         Name of the application the logging context is created for. Used to label logs sent to Splunk, Slack, etc.
     .PARAMETER SlackWebhook
@@ -30,8 +30,8 @@ function New-SentinelContext {
         Verbose - Send all logs to Splunk.
     .PARAMETER SplunkLogType
         How to send logs to Splunk.
-        Summary constructs a single log sumarry and sends it at the end of the logging session (must use Close-SentinelSession).
-        AdHoc sends logs as they're recieved by Sentinel through Write-SentinelLog.
+        Summary constructs a single log sumarry and sends it at the end of the logging session (must use Close-LaugerSession).
+        AdHoc sends logs as they're recieved by Lauger through Write-LaugerLog.
     .PARAMETER SlackVerbosity
         Logging level for Slack.
 
@@ -41,8 +41,8 @@ function New-SentinelContext {
         Verbose - Send all logs to Slack.
     .PARAMETER SlackLogType
         How to send logs to Slack.
-        Summary constructs a single log sumarry and sends it at the end of the logging session (must use Close-SentinelSession).
-        AdHoc sends logs as they're recieved by Sentinel through Write-SentinelLog.
+        Summary constructs a single log sumarry and sends it at the end of the logging session (must use Close-LaugerSession).
+        AdHoc sends logs as they're recieved by Lauger through Write-LaugerLog.
     .PARAMETER EmailVerbosity
         Logging level for Email.
 
@@ -52,8 +52,8 @@ function New-SentinelContext {
         Verbose - Send all logs to email.
     .PARAMETER EmailLogType
         How to send logs to email.
-        Summary constructs a single log sumarry and sends it at the end of the logging session (must use Close-SentinelSession).
-        AdHoc sends logs as they're recieved by Sentinel through Write-SentinelLog.
+        Summary constructs a single log sumarry and sends it at the end of the logging session (must use Close-LaugerSession).
+        AdHoc sends logs as they're recieved by Lauger through Write-LaugerLog.
     .PARAMETER LogVerbosity
         Logging level to use for all output streams. Defaults to Error.
         Sets the default for all streams. Can be overridden by specifying a logging level for a given stream.
@@ -65,8 +65,8 @@ function New-SentinelContext {
         Verbose - Send all logs.
     .PARAMETER LogType
         Default method for sending logs to all log streams. Defaults to Summary.
-        Summary constructs a single log sumarry and sends it at the end of the logging session (must use Close-SentinelSession).
-        AdHoc sends logs as they're recieved by Sentinel through Write-SentinelLog.
+        Summary constructs a single log sumarry and sends it at the end of the logging session (must use Close-LaugerSession).
+        AdHoc sends logs as they're recieved by Lauger through Write-LaugerLog.
     #>
     param (
         [Parameter(Mandatory = $true)]
@@ -124,74 +124,74 @@ function New-SentinelContext {
     )
 
     if ($Application) {
-        $SentinelContext.Application = $Application
-        Write-Verbose "SentinelContext for application [$Application]"
+        $LaugerContext.Application = $Application
+        Write-Verbose "LaugerContext for application [$Application]"
     }
-    $SentinelContext.Host = if ($env:COMPUTERNAME) {$env:COMPUTERNAME} else {Hostname}
-    Write-Verbose "SentinelContext for host [$SentinelContext.Host]"
+    $LaugerContext.Host = if ($env:COMPUTERNAME) {$env:COMPUTERNAME} else {Hostname}
+    Write-Verbose "LaugerContext for host [$LaugerContext.Host]"
 
     if ($LogVerbosity) {
-        foreach ($stream in $SentinelContext.LogStreams.Keys) {$SentinelContext.LogStreams[$stream].Verbosity = $LogVerbosity}
-        Write-Verbose "Setting SentinelContext default log verbosity [$LogVerbosity]"
+        foreach ($stream in $LaugerContext.LogStreams.Keys) {$LaugerContext.LogStreams[$stream].Verbosity = $LogVerbosity}
+        Write-Verbose "Setting LaugerContext default log verbosity [$LogVerbosity]"
     }
 
     if ($LogType) {
-        foreach ($stream in $SentinelContext.LogStreams.Keys) {$SentinelContext.LogStreams[$stream].LogType = $LogType}
-        Write-Verbose "Setting SentinelContext default log type [$LogType]"
+        foreach ($stream in $LaugerContext.LogStreams.Keys) {$LaugerContext.LogStreams[$stream].LogType = $LogType}
+        Write-Verbose "Setting LaugerContext default log type [$LogType]"
     }
 
     $enableEmail = $true
-    if ($SenderEmail) {$SentinelContext.LogStreams.Mail.Sender = $SenderEmail} else {$enableEmail = $false}
-    if ($SMTPCreds) {$SentinelContext.LogStreams.Mail.SMTPCreds = $SMTPCreds} else {$enableEmail = $false}
+    if ($SenderEmail) {$LaugerContext.LogStreams.Mail.Sender = $SenderEmail} else {$enableEmail = $false}
+    if ($SMTPCreds) {$LaugerContext.LogStreams.Mail.SMTPCreds = $SMTPCreds} else {$enableEmail = $false}
     if ($enableEmail) {
-        if ($SMTPPort) {$SentinelContext.LogStreams.Mail.SMTPPort = $SMTPPort}
-        if ($SMTPSSL) {$SentinelContext.LogStreams.Mail.SMTPSSL = $SMTPSSL}
-        $SentinelContext.LogStreams.Email.Enabled = $true
-        Write-Verbose "Enabled Sentinel log stream [Email]"
+        if ($SMTPPort) {$LaugerContext.LogStreams.Mail.SMTPPort = $SMTPPort}
+        if ($SMTPSSL) {$LaugerContext.LogStreams.Mail.SMTPSSL = $SMTPSSL}
+        $LaugerContext.LogStreams.Email.Enabled = $true
+        Write-Verbose "Enabled Lauger log stream [Email]"
 
         if ($EmailVerbosity) {
-            $SentinelContext.LogStreams.Mail.Verbosity = $EmailVerbosity
-            Write-Verbose "Setting Sentinel log stream [Email] verbosity [$EmailVerbosity]"
+            $LaugerContext.LogStreams.Mail.Verbosity = $EmailVerbosity
+            Write-Verbose "Setting Lauger log stream [Email] verbosity [$EmailVerbosity]"
         }
         if ($EmailLogType) {
-            $SentinelContext.LogStreams.Mail.LogType = $EmailLogType
-            Write-Verbose "Setting Sentinel log stream [Email] log type [$EmailLogType]"
+            $LaugerContext.LogStreams.Mail.LogType = $EmailLogType
+            Write-Verbose "Setting Lauger log stream [Email] log type [$EmailLogType]"
         }
     }
 
     $enableSlack = $true
-    if ($SlackWebhook) {$SentinelContext.LogStreams.Slack.Webhook = $SlackWebhook} else {$enableSlack = $false}
+    if ($SlackWebhook) {$LaugerContext.LogStreams.Slack.Webhook = $SlackWebhook} else {$enableSlack = $false}
     if ($enableSlack) {
-        $SentinelContext.LogStreams.Slack.Enabled = $true
-        Write-Verbose "Enabled Sentinel log stream [Slack]"
+        $LaugerContext.LogStreams.Slack.Enabled = $true
+        Write-Verbose "Enabled Lauger log stream [Slack]"
 
         if ($SlackVerbosity) {
-            $SentinelContext.LogStreams.Slack.Verbosity = $SlackVerbosity
-            Write-Verbose "Setting Sentinel log stream [Slack] verbosity [$SlackVerbosity]"
+            $LaugerContext.LogStreams.Slack.Verbosity = $SlackVerbosity
+            Write-Verbose "Setting Lauger log stream [Slack] verbosity [$SlackVerbosity]"
         }
         if ($SlackLogType) {
-            $SentinelContext.LogStreams.Slack.LogType = $SlackLogType
-            Write-Verbose "Setting Sentinel log stream [Slack] log type [$SlackLogType]"
+            $LaugerContext.LogStreams.Slack.LogType = $SlackLogType
+            Write-Verbose "Setting Lauger log stream [Slack] log type [$SlackLogType]"
         }
     }
 
     $enableSplunk = $true
-    if ($SplunkURI) {$SentinelContext.LogStreams.Splunk.Uri = $SplunkURI} else {$enableSplunk = $false}
+    if ($SplunkURI) {$LaugerContext.LogStreams.Splunk.Uri = $SplunkURI} else {$enableSplunk = $false}
     if ($SplunkAuthKey) {
-        $SentinelContext.LogStreams.Splunk.Headers['authorization'] = $([Net.NetworkCredential]::new('', $SplunkAuthKey).Password)
+        $LaugerContext.LogStreams.Splunk.Headers['authorization'] = $([Net.NetworkCredential]::new('', $SplunkAuthKey).Password)
     } else {$enableSplunk = $false}
     if ($enableSplunk) {
-        $SentinelContext.LogStreams.Splunk.Enabled = $true
-        Write-Verbose "Enabled Sentinel log stream [Splunk]"
+        $LaugerContext.LogStreams.Splunk.Enabled = $true
+        Write-Verbose "Enabled Lauger log stream [Splunk]"
 
         if ($SplunkVerbosity) {
-            $Sentinel.Splunk.Verbosity = $SplunkVerbosity
-            Write-Verbose "Setting Sentinel log stream [Splunk] verbosity [$SplunkVerbosity]"
+            $Lauger.Splunk.Verbosity = $SplunkVerbosity
+            Write-Verbose "Setting Lauger log stream [Splunk] verbosity [$SplunkVerbosity]"
         }
         if ($SplunkLogType) {
-            $SentinelContext.LogStreams.Splunk.LogType = $SplunkLogType
-            Write-Verbose "Setting Sentinel log stream [Splunk] log type [$SplunkLogType]"
+            $LaugerContext.LogStreams.Splunk.LogType = $SplunkLogType
+            Write-Verbose "Setting Lauger log stream [Splunk] log type [$SplunkLogType]"
         }
     }
-    return $SentinelContext
+    LaugerLaugerContext
 }

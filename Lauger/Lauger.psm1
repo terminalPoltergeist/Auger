@@ -19,7 +19,7 @@ foreach ($import in @($public + $private)) {
 # ENDREGION
 
 # REGION module variables
-$SentinelContext = [ordered]@{
+$LaugerContext = [ordered]@{
     Application     = $null
     Host            = $null
 
@@ -49,5 +49,5 @@ $SentinelContext = [ordered]@{
     }
 }
 
-New-Variable -Name SentinelContext -Value $SentinelContext -Scope Script -Force
+New-Variable -Name LaugerContext -Value $LaugerContext -Scope Script -Force
 # ENDREGION
