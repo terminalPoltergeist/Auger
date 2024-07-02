@@ -194,5 +194,4 @@ function New-LaugerContext {
             Write-Verbose "Setting Lauger log stream [Splunk] log type [$SplunkLogType]"
         }
     }
-    return $LaugerContext
 }

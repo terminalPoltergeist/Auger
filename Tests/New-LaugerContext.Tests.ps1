@@ -8,7 +8,8 @@ Describe 'New-LaugerContext' {
     }
 
     It 'Initializes a default context' {
-        $ctx = New-LaugerContext -Application 'Pester'
+        New-LaugerContext -Application 'Pester'
+        $ctx = Get-LaugerContext
         $ctx.Application | Should -Be 'Pester'
         $defaultLogStreams = @{
             Mail = [ordered]@{
@@ -44,7 +45,8 @@ Describe 'New-LaugerContext' {
             SlackVerbosity = 'Verbose'
             SlackLogType = 'AdHoc'
         }
-        $ctx = New-LaugerContext @params
+        New-LaugerContext @params
+        $ctx = Get-LaugerContext
         $ctx.Application | Should -Be 'Pester'
         $LogStreams = @{
             Mail = [ordered]@{
@@ -83,7 +85,8 @@ Describe 'New-LaugerContext' {
             SplunkURI = 'https://test.splunk.webhook123'
             SplunkAuthKey = ConvertTo-SecureString 'Splunk supersecret' -AsPlainText
         }
-        $ctx = New-LaugerContext @params
+        New-LaugerContext @params
+        $ctx = Get-LaugerContext
         $ctx.Application | Should -Be 'Pester'
         $LogStreams = @{
             Mail = [ordered]@{
