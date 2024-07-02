@@ -19,12 +19,14 @@ foreach ($import in @($public + $private)) {
 # ENDREGION
 
 # REGION module variables
-$LaugerContext = [ordered]@{
+$LaugerContext = [pscustomobject]@{
     Application     = $null
     Host            = $null
+    Source          = $null
 
-    LogStreams = @{
-        Mail = [ordered]@{
+    LogStreams = @(
+        [pscustomobject]@{
+            Name        = 'Email'
             Enabled     = $false
             Sender      = $null
             SMTPPort    = $null
@@ -32,21 +34,26 @@ $LaugerContext = [ordered]@{
             SMTPSSL     = $true
             Verbosity   = $null
             LogType     = $null
+            Summary     = $null
         }
-        Slack = [ordered]@{
+        [pscustomobject]@{
+            Name        = 'Slack'
             Enabled     = $false
             Webhook     = $null
             Verbosity   = $null
             LogType     = $null
+            Summary     = $null
         }
-        Splunk = [ordered]@{
+        [pscustomobject]@{
+            Name        = 'Splunk'
             Enabled     = $false
             Uri         = $null
             Headers     = $null
             Verbosity   = $null
             LogType     = $null
+            Summary     = $null
         }
-    }
+    )
 }
 
 New-Variable -Name LaugerContext -Value $LaugerContext -Scope Script -Force

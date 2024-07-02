@@ -1,12 +1,16 @@
 function New-LaugerContext {
     <#
     .SYNOPSIS
-        Initialize a messaging and logging context.
+        Initialize a Lauger context.
     .DESCRIPTION
         This function initializes the module's namespace variables.
         The variable mapping can be found in the module's root .psm1 file. It is called $LaugerContext.
     .PARAMETER Application
         Name of the application the logging context is created for. Used to label logs sent to Splunk, Slack, etc.
+    .PARAMETER Source
+        Source of the logs. Used as metadata in some log streams.
+        Can describe platform/infrastructure. ex. AzureRunbook, AzureFunction, Ansible, etc.
+        Defaults to Lauger.
     .PARAMETER SlackWebhook
         The http webhook endpoint for the Slack channel application.
     .PARAMETER SenderEmail
@@ -73,6 +77,8 @@ function New-LaugerContext {
         [Parameter(Mandatory = $true)]
         [string]$Application,
 
+        [string]$Source = 'Lauger',
+
         [ValidateScript({
             if ($_ -notmatch '^[(http|https)://].*$') {
                 throw "Provided Slack webhook [$_] is not a properly formatted webhook."
@@ -126,71 +132,83 @@ function New-LaugerContext {
 
     if ($Application) {
         $LaugerContext.Application = $Application
-        Write-Verbose "LaugerContext for application [$Application]"
+        Write-Verbose "Lauger application [$Application]"
     }
     $LaugerContext.Host = if ($env:COMPUTERNAME) {$env:COMPUTERNAME} else {Hostname}
-    Write-Verbose "LaugerContext for host [$($LaugerContext.Host)]"
+    Write-Verbose "Lauger host [$($LaugerContext.Host)]"
+    $LaugerContext.Source = $Source
+    Write-Verbose "Lauger Source [$Source]"
 
     if ($LogVerbosity) {
-        foreach ($stream in $LaugerContext.LogStreams.Keys) {$LaugerContext.LogStreams[$stream].Verbosity = $LogVerbosity}
-        Write-Verbose "Setting LaugerContext default log verbosity [$LogVerbosity]"
+        foreach ($stream in $LaugerContext.LogStreams) {$stream.Verbosity = $LogVerbosity }
+        Write-Verbose "Setting Lauger default log verbosity [$LogVerbosity]"
     }
 
     if ($LogType) {
-        foreach ($stream in $LaugerContext.LogStreams.Keys) {$LaugerContext.LogStreams[$stream].LogType = $LogType}
-        Write-Verbose "Setting LaugerContext default log type [$LogType]"
+        foreach ($stream in $LaugerContext.LogStreams) {
+            $stream.LogType = $LogType
+            if ($LogType -eq 'Summary') { $stream.Summary = '' }
+        }
+        Write-Verbose "Setting Lauger default log type [$LogType]"
     }
 
     $enableEmail = $true
-    if ($SenderEmail) {$LaugerContext.LogStreams.Mail.Sender = $SenderEmail} else {$enableEmail = $false}
-    if ($SMTPCreds) {$LaugerContext.LogStreams.Mail.SMTPCreds = $SMTPCreds} else {$enableEmail = $false}
+    if ($SenderEmail) { ($LaugerContext.LogStreams | Where-Object -Property Name -eq 'Email').Sender = $SenderEmail } else { $enableEmail = $false }
+    if ($SMTPCreds) { ($LaugerContext.LogStreams | Where-Object -Property Name -eq 'Email').SMTPCreds = $SMTPCreds } else { $enableEmail = $false }
     if ($enableEmail) {
-        if ($SMTPPort) {$LaugerContext.LogStreams.Mail.SMTPPort = $SMTPPort}
-        if ($SMTPSSL) {$LaugerContext.LogStreams.Mail.SMTPSSL = $SMTPSSL}
-        $LaugerContext.LogStreams.Mail.Enabled = $true
+        if ($SMTPPort) { ($LaugerContext.LogStreams | Where-Object -Property Name -eq 'Email').SMTPPort = $SMTPPort }
+        if ($SMTPSSL) { ($LaugerContext.LogStreams | Where-Object -Property Name -eq 'Email').SMTPSSL = $SMTPSSL }
+        ($LaugerContext.LogStreams | Where-Object -Property Name -eq 'Email').Enabled = $true
         Write-Verbose "Enabled Lauger log stream [Email]"
 
         if ($EmailVerbosity) {
-            $LaugerContext.LogStreams.Mail.Verbosity = $EmailVerbosity
+            ($LaugerContext.LogStreams | Where-Object -Property Name -eq 'Email').Verbosity = $EmailVerbosity
             Write-Verbose "Setting Lauger log stream [Email] verbosity [$EmailVerbosity]"
         }
         if ($EmailLogType) {
-            $LaugerContext.LogStreams.Mail.LogType = $EmailLogType
+            ($LaugerContext.LogStreams | Where-Object -Property Name -eq 'Email').LogType = $EmailLogType
+            if ($EmailLogType -eq 'Summary') { $LaugerContext.LogStreams.Email.Summary = '' }
             Write-Verbose "Setting Lauger log stream [Email] log type [$EmailLogType]"
         }
     }
 
     $enableSlack = $true
-    if ($SlackWebhook) {$LaugerContext.LogStreams.Slack.Webhook = $SlackWebhook} else {$enableSlack = $false}
+    if ($SlackWebhook) { ($LaugerContext.LogStreams | Where-Object -Property Name -eq 'Slack').Webhook = $SlackWebhook } else { $enableSlack = $false }
     if ($enableSlack) {
-        $LaugerContext.LogStreams.Slack.Enabled = $true
+        ($LaugerContext.LogStreams | Where-Object -Property Name -eq 'Slack').Enabled = $true
         Write-Verbose "Enabled Lauger log stream [Slack]"
 
         if ($SlackVerbosity) {
-            $LaugerContext.LogStreams.Slack.Verbosity = $SlackVerbosity
+            ($LaugerContext.LogStreams | Where-Object -Property Name -eq 'Slack').Verbosity = $SlackVerbosity
             Write-Verbose "Setting Lauger log stream [Slack] verbosity [$SlackVerbosity]"
         }
         if ($SlackLogType) {
-            $LaugerContext.LogStreams.Slack.LogType = $SlackLogType
+            ($LaugerContext.LogStreams | Where-Object -Property Name -eq 'Slack').LogType = $SlackLogType
+            if ($SlackLogType -eq 'Summary') {
+                ($LaugerContext.LogStreams | Where-Object -Property Name -eq 'Slack').Summary = ''
+            } else {
+                ($LaugerContext.LogStreams | Where-Object -Property Name -eq 'Slack').Summary = $null
+            }
             Write-Verbose "Setting Lauger log stream [Slack] log type [$SlackLogType]"
         }
     }
 
     $enableSplunk = $true
-    if ($SplunkURI) {$LaugerContext.LogStreams.Splunk.Uri = $SplunkURI} else {$enableSplunk = $false}
+    if ($SplunkURI) { ($LaugerContext.LogStreams | Where-Object -Property Name -eq 'Splunk').Uri = $SplunkURI } else { $enableSplunk = $false }
     if ($SplunkAuthKey) {
-        $LaugerContext.LogStreams.Splunk.Headers = @{Authorization = $SplunkAuthKey}
+        ($LaugerContext.LogStreams | Where-Object -Property Name -eq 'Splunk').Headers = @{Authorization = $SplunkAuthKey}
     } else {$enableSplunk = $false}
     if ($enableSplunk) {
-        $LaugerContext.LogStreams.Splunk.Enabled = $true
+        ($LaugerContext.LogStreams | Where-Object -Property Name -eq 'Splunk').Enabled = $true
         Write-Verbose "Enabled Lauger log stream [Splunk]"
 
         if ($SplunkVerbosity) {
-            $Lauger.Splunk.Verbosity = $SplunkVerbosity
+            ($LaugerContext.LogStreams | Where-Object -Property Name -eq 'Splunk').Verbosity = $SplunkVerbosity
             Write-Verbose "Setting Lauger log stream [Splunk] verbosity [$SplunkVerbosity]"
         }
         if ($SplunkLogType) {
-            $LaugerContext.LogStreams.Splunk.LogType = $SplunkLogType
+            ($LaugerContext.LogStreams | Where-Object -Property Name -eq 'Splunk').LogType = $SplunkLogType
+            if ($SplunkLogType -eq 'Summary') { ($LaugerContext.LogStreams | Where-Object -Property Name -eq 'Splunk').Summary = '' }
             Write-Verbose "Setting Lauger log stream [Splunk] log type [$SplunkLogType]"
         }
     }

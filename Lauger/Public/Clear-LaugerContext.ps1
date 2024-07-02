@@ -2,12 +2,14 @@ function Clear-LaugerContext {
     [CmdletBinding()]
     param ()
 
-    $Script:LaugerContext = [ordered]@{
+    $Script:LaugerContext = [pscustomobject]@{
         Application     = $null
         Host            = $null
+        Source          = $null
 
-        LogStreams = @{
-            Mail = [ordered]@{
+        LogStreams = @(
+            [pscustomobject]@{
+                Name        = 'Email'
                 Enabled     = $false
                 Sender      = $null
                 SMTPPort    = $null
@@ -15,20 +17,25 @@ function Clear-LaugerContext {
                 SMTPSSL     = $true
                 Verbosity   = $null
                 LogType     = $null
+                Summary     = $null
             }
-            Slack = [ordered]@{
+            [pscustomobject]@{
+                Name        = 'Slack'
                 Enabled     = $false
                 Webhook     = $null
                 Verbosity   = $null
                 LogType     = $null
+                Summary     = $null
             }
-            Splunk = [ordered]@{
+            [pscustomobject]@{
+                Name        = 'Splunk'
                 Enabled     = $false
                 Uri         = $null
                 Headers     = $null
                 Verbosity   = $null
                 LogType     = $null
+                Summary     = $null
             }
-        }
+        )
     }
 }
