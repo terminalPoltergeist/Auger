@@ -20,7 +20,7 @@ foreach ($import in @($public + $private)) {
 
 # REGION module variables
 $AugerContext = [pscustomobject]@{
-    Application     = $null
+    Application     = $null # required
     Host            = $null
     Source          = $null
     LogFile         = $null
