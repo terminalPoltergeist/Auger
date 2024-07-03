@@ -15,6 +15,8 @@ function New-AugerContext {
         The http webhook endpoint for the Slack channel application.
     .PARAMETER SenderEmail
         Email address to send automated messages from. Usually a service account like hosting-support@umn.edu.
+    .PARAMETER ReceiverEmail
+        Email address to send automated messages to.
     .PARAMETER SMTPCreds
         NetworkCredentials for authenticating with the SMTP server for sending email messages.
     .PARAMETER SMTPPort
@@ -94,12 +96,20 @@ function New-AugerContext {
         [string]$SlackLogType,
 
         [ValidateScript({
-            if ($_ -notmatch '^[a-zA-Z0-9]+@.*$') {
+            if ($_ -notmatch '^[a-zA-Z0-9\-]+@.*$') {
                 throw "Provided sender email [$_] is not a valid email."
             }
             return $true
         })]
         [string]$SenderEmail,
+
+        [ValidateScript({
+            if ($_ -notmatch '^[a-zA-Z0-9\-]+@.*$') {
+                throw "Provided sender email [$_] is not a valid email."
+            }
+            return $true
+        })]
+        [string]$ReceiverEmail,
 
         [System.Net.NetworkCredential]$SMTPCreds,
 
@@ -140,7 +150,7 @@ function New-AugerContext {
     Write-Verbose "Auger Source [$Source]"
 
     $AugerContext.LogFile = New-TemporaryFile
-    Write-Verbose "Created log file at $($AugerContext.LogFile.FullName)"
+    Write-Verbose "Created Auger log file at $($AugerContext.LogFile.FullName)"
 
     if ($LogVerbosity) {
         foreach ($stream in $AugerContext.LogStreams) {$stream.Verbosity = $LogVerbosity }
@@ -160,6 +170,7 @@ function New-AugerContext {
     if ($enableEmail) {
         if ($SMTPPort) { ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').SMTPPort = $SMTPPort }
         if ($SMTPSSL) { ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').SMTPSSL = $SMTPSSL }
+        if ($ReceiverEmail) { ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').Receiver = $ReceiverEmail }
         ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').Enabled = $true
         Write-Verbose "Enabled Auger log stream [Email]"
 

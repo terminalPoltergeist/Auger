@@ -30,11 +30,13 @@ $AugerContext = [pscustomobject]@{
             Name        = 'Email'
             Enabled     = $false
             Sender      = $null
+            Receiver    = $null
             SMTPPort    = $null
             SMTPCreds   = New-Object System.Net.NetworkCredential($null, $null)
             SMTPSSL     = $true
             Verbosity   = $null
             LogType     = $null
+            Command     = 'Send-MailLog'
         }
         [pscustomobject]@{
             Name        = 'Slack'
@@ -42,6 +44,7 @@ $AugerContext = [pscustomobject]@{
             Webhook     = $null
             Verbosity   = $null
             LogType     = $null
+            Command     = 'Send-SlackLog'
         }
         [pscustomobject]@{
             Name        = 'Splunk'
@@ -50,6 +53,7 @@ $AugerContext = [pscustomobject]@{
             Headers     = $null
             Verbosity   = $null
             LogType     = $null
+            Command     = 'Send-SplunkLog'
         }
     )
 }

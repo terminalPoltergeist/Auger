@@ -5,15 +5,15 @@ function Send-SplunkLog {
     .DESCRIPTION
         This function uses the Splunk HTTP Event Collector to send logs to Splunk.
     .PARAMETER Uri
-        URI for HEC endpoint. Defaults to the value from $MaLContext.Splunk.Uri.
-    .PARAMETER SpunkAuthKey
+        URI for HEC endpoint. Defaults to the URI value from the Splunk LogStream in $AugerContext.
+    .PARAMETER SplunkAuthKey
         A SecureString containing the access key for the Splunk HEC.
     .PARAMETER Headers
         Key value pairs for optional HTTP headers. The Authorization headers is automatically configured from $SplunkAuthKey.
     .PARAMETER Host
-        The hostname of the machine sending events. Defaults to the value from $MaLContext.Host.
+        The hostname of the machine sending events. Defaults to the value from $AugerContext.Host.
     .PARAMETER Source
-        The source application sending the data. Defaults to $MaLContext.Application.
+        The source application sending the data. Defaults to $AugerContext.Application.
     .PARAMETER SourceType
         The type of source sending the data. Will be prepended with 'HEC:'.
     .PARAMETER Retries
