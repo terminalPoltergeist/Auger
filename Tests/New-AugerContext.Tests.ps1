@@ -1,15 +1,15 @@
 BeforeAll {
-    Import-Module ./Lauger/
+    Import-Module ./Auger/
 }
 
-Describe 'New-LaugerContext' {
+Describe 'New-AugerContext' {
     BeforeEach {
-        Clear-LaugerContext
+        Clear-AugerContext
     }
 
     It 'Initializes a default context' {
-        New-LaugerContext -Application 'Pester'
-        $ctx = Get-LaugerContext
+        New-AugerContext -Application 'Pester'
+        $ctx = Get-AugerContext
         $ctx.Application | Should -Be 'Pester'
         $ctx.LogFile | Should -Match "[0-9a-zA-Z]+\.[tmp]"
 
@@ -39,8 +39,8 @@ Describe 'New-LaugerContext' {
             SlackVerbosity = 'Verbose'
             SlackLogType = 'AdHoc'
         }
-        New-LaugerContext @params
-        $ctx = Get-LaugerContext
+        New-AugerContext @params
+        $ctx = Get-AugerContext
         $ctx.Application | Should -Be 'Pester'
         $ctx.LogFile | Should -Match "[0-9a-zA-Z]+\.[tmp]"
 
@@ -73,8 +73,8 @@ Describe 'New-LaugerContext' {
             SplunkURI = 'https://test.splunk.webhook123'
             SplunkAuthKey = ConvertTo-SecureString 'Splunk supersecret' -AsPlainText
         }
-        New-LaugerContext @params
-        $ctx = Get-LaugerContext
+        New-AugerContext @params
+        $ctx = Get-AugerContext
         $ctx.Application | Should -Be 'Pester'
         $ctx.LogFile | Should -Match "[0-9a-zA-Z]+\.[tmp]"
 

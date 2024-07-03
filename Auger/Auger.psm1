@@ -19,7 +19,7 @@ foreach ($import in @($public + $private)) {
 # ENDREGION
 
 # REGION module variables
-$LaugerContext = [pscustomobject]@{
+$AugerContext = [pscustomobject]@{
     Application     = $null
     Host            = $null
     Source          = $null
@@ -54,5 +54,5 @@ $LaugerContext = [pscustomobject]@{
     )
 }
 
-New-Variable -Name LaugerContext -Value $LaugerContext -Scope Script -Force
+New-Variable -Name AugerContext -Value $AugerContext -Scope Script -Force
 # ENDREGION

@@ -1,7 +1,7 @@
 @{
 
 # Script module or binary module file associated with this manifest.
-RootModule = './Lauger.psm1'
+RootModule = './Auger.psm1'
 
 # Version number of this module.
 ModuleVersion = '0.1.0'
@@ -61,7 +61,7 @@ Description = 'A Powershell logging library designed for automation.'
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = @('New-LaugerContext', 'Clear-LaugerContext', 'Get-LaugerContext', 'Write-Lauger')
+FunctionsToExport = @('New-AugerContext', 'Clear-AugerContext', 'Get-AugerContext', 'Write-Auger')
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()

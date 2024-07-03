@@ -1,9 +1,9 @@
-function Write-Lauger {
+function Write-Auger {
     <#
     .DESCRIPTION
         This function consumes log information from a script, formats and writes logs to each configured LogStream.
         Use it in place of Write-Warning, Write-Error, etc.
-        Write-Lauger will handle writing logs to the host output stream.
+        Write-Auger will handle writing logs to the host output stream.
     .PARAMETER Message
         The message to log.
     .PARAMETER IsWarning
@@ -20,7 +20,7 @@ function Write-Lauger {
         [switch]$IsWarning
     )
 
-    $EnabledLogStreams = $LaugerContext.LogStreams | Where-Object -Property Enabled -eq $true
+    $EnabledLogStreams = $AugerContext.LogStreams | Where-Object -Property Enabled -eq $true
 
     foreach ($stream in $EnabledLogStreams) {
         $stream.Summary += "$Message`n"
