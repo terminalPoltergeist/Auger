@@ -1,8 +1,8 @@
-function Clear-LaugerContext {
+function Clear-AugerContext {
     [CmdletBinding()]
     param ()
 
-    $Script:LaugerContext = [pscustomobject]@{
+    $Script:AugerContext = [pscustomobject]@{
         Application     = $null
         Host            = $null
         Source          = $null
