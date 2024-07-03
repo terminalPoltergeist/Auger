@@ -1,64 +1,67 @@
-Function Send-MailMessage {
+Function Send-MailLog {
     <#
     .SYNOPSIS
-       This function sends an email using SMTP.
-
+        Send a log to an email over SMTP.
     .DESCRIPTION
-       The Send-Mail function sends an email using the SMTP protocol. It creates a new MailMessage object and sets the sender, recipient, subject, and body of the email. It then creates an SmtpClient object, sets the SMTP server details, enables SSL, sets the credentials, and sends the email.
-
-    .PARAMETER to
-       The recipient's email address. This is a mandatory parameter.
-
-    .PARAMETER from
-        The email address to send the email from. This is an optional parameter. Throws error if not supplied and $Mail.Sender is null.
-
-    .PARAMETER subject
-       The subject of the email. This is a mandatory parameter.
-
-    .PARAMETER body
-       The body of the email. This is a mandatory parameter.
-
+        This function sends a log to a specified email account using SMTP.
+        It creates a new MailMessage object and sets the sender, recipient, subject, and body of the email.
+        It then creates an SmtpClient object, sets the SMTP server details, enables SSL, sets the credentials, and sends the email.
+    .PARAMETER To
+        The recipient email address. Defaults to the configured Receiver in the $AugerContext Email LogStream.
+    .PARAMETER Subject
+        The email subject line. Defaults to "$Severity: $Application from $Source on $Host".
+        $Application, $Source, and $Host variables are configured in $AugerContext.
+    .PARAMETER Body
+        The log body to send.
+    .PARAMETER Severity
+        Info, Warn, or Error.
+        Labeling the log with a severity. Used to construct a message subject if one is not provided.
     .EXAMPLE
-       Send-Mail -to "recipient@example.com" -from "me@example.com" -subject "Test Email" -body "This is a test email."
-
+       Send-MailLog -To "recipient@example.com" -subject "Test Email" -body "This is a test email."
     .NOTES
-       The function uses the SMTP server smtp.gmail.com on port 587 (or configured in $Mail.SMTPPort). The credentials for the SMTP server are configured in $Mail.SMTPCreds.
+       The function uses the SMTP server smtp.gmail.com on port 587 (or configured in the Email LogStream in $AugerContext).
+       The credentials for the SMTP server are configured in the Email LogStream in $AugerContext.
     #>
 
     param (
-        [Parameter (Mandatory = $true)]
-        [string]$to,
-        [Parameter (Mandatory = $false)]
-        [string]$from,
-        [Parameter (Mandatory = $true)]
-        [string]$subject,
-        [Parameter (Mandatory = $true)]
-        [string]$body
+        [Parameter (Mandatory = $true, Position = 0)]
+        [string]$Body,
+
+        [ValidateScript({
+            if ($_ -notmatch '^[a-zA-Z0-9]+@.*$') {
+                throw "Provided sender email [$_] is not a valid email."
+            }
+            return $true
+        })]
+        [string]$To = (($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').Receiver),
+
+        [string]$Subject,
+
+        [ValidateSet('Info', 'Warn', 'Error')]
+        [string]$Severity = 'Info'
     )
 
-    $message = new-object Net.Mail.MailMessage;
-
-    if (!$Mail.Sender -and !$from) {
-        throw "No sender email provided."
+    if (-not $To) {
+        throw "No destination email provided."
     }
-    if ($from) {
-        $message.From = $from;
+
+    $mail = New-Object System.Net.Mail.MailMessage
+    $mail.From = ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').Sender
+
+    $mail.To.Add($to);
+    if (-not $Subject) {
+        $Subject = "$Severity`: $($AugerContext.Application) from $($AugerContext.Source) on $($AugerContext.Host)"
+    }
+    $mail.Subject = $Subject
+    $mail.Body = $Body
+
+    if (($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').SMTPPort) {
+        $smtp = new-object Net.Mail.SmtpClient("smtp.gmail.com", ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').SMTPPort)
     } else {
-        $message.From = $Mail.Sender
+        $smtp = new-object Net.Mail.SmtpClient("smtp.gmail.com", "587")
     }
 
-    $message.To.Add($to);
-    $message.Subject = $subject;
-    $message.Body = $body;
-
-    if ($Mail.SMTPPort) {
-        $smtp = new-object Net.Mail.SmtpClient("smtp.gmail.com", $Mail.SMTPPort);
-    } else {
-        $smtp = new-object Net.Mail.SmtpClient("smtp.gmail.com", "587");
-    }
-
-    $smtp.EnableSSL = $Mail.SMTPSSL;
-    $smtp.Credentials = $Mail.SMTPCreds;
-    # $smtp.send($message);
-    Write-Host $smtp.EnableSsl
+    $smtp.EnableSSL = ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').SMTPSSL
+    $smtp.Credentials = ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').SMTPCreds
+    $smtp.send($mail)
 }
