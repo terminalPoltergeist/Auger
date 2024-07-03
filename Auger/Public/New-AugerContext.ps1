@@ -38,7 +38,7 @@ function New-AugerContext {
     .PARAMETER SplunkLogType
         How to send logs to Splunk.
         Summary sends the contents of $AugerContext.LogFile at the end of the log session (must use Close-AugerSession).
-        AdHoc sends logs as they're recieved by Auger through Write-AugerLog.
+        AdHoc sends logs as they're recieved by Auger through Write-Auger.
     .PARAMETER SlackVerbosity
         Logging level for Slack.
 
@@ -49,7 +49,7 @@ function New-AugerContext {
     .PARAMETER SlackLogType
         How to send logs to Slack.
         Summary sends the contents of $AugerContext.LogFile at the end of the log session (must use Close-AugerSession).
-        AdHoc sends logs as they're recieved by Auger through Write-AugerLog.
+        AdHoc sends logs as they're recieved by Auger through Write-Auger.
     .PARAMETER EmailVerbosity
         Logging level for Email.
 
@@ -60,7 +60,7 @@ function New-AugerContext {
     .PARAMETER EmailLogType
         How to send logs to email.
         Summary sends the contents of $AugerContext.LogFile at the end of the log session (must use Close-AugerSession).
-        AdHoc sends logs as they're recieved by Auger through Write-AugerLog.
+        AdHoc sends logs as they're recieved by Auger through Write-Auger.
     .PARAMETER LogVerbosity
         Logging level to use for all output streams. Defaults to Error.
         Sets the default for all streams. Can be overridden by specifying a logging level for a given stream.

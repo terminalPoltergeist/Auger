@@ -26,14 +26,28 @@ function Write-Auger {
     )
 
     if ($PSCmdlet.ShouldProcess("$($AugerContext.LogFile.Name)", 'Write to log file')) {
-        $Message | Add-Content -Path $AugerContext.LogFile.FullName
+        if ($IsError) {
+            ("ERROR: {0}" -f $Message) | Add-Content -Path $AugerContext.LogFile.FullName
+        } elseif ($IsWarning) {
+            ("WARN: {0}" -f $Message) | Add-Content -Path $AugerContext.LogFile.FullName
+        } else {
+            ("INFO: {0}" -f $Message) | Add-Content -Path $AugerContext.LogFile.FullName
+        }
     }
 
     $EnabledLogStreams = $AugerContext.LogStreams | Where-Object -Property Enabled -eq $true
 
     foreach ($stream in $EnabledLogStreams) {
         if ($PSCmdlet.ShouldProcess("$($Stream.Name)", "Send log")) {
-            . $stream.Command $Message
+            if ($stream.LogType -eq 'AdHoc') {
+                switch ($stream.Verbosity) {
+                'Error' { if ($IsError) {. $stream.Command $Message} }
+                'Warn' { if ($IsWarning -or $IsError) {. $stream.Command $Message} }
+                'Verbose' { . $stream.Command $Message }
+                'Quiet' {continue}
+                default {continue}
+                }
+            }
         }
     }
 
