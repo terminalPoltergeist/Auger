@@ -6,29 +6,44 @@ function Write-Auger {
         Write-Auger will handle writing logs to the host output stream.
     .PARAMETER Message
         The message to log.
+    .PARAMETER Options
+        Support coming soon.
+        Parameters to pass to the log stream handler.
+        Provided as a hashtable where the key is the parameter name the log stream expects and the value is the value of that parameter.
     .PARAMETER IsWarning
         Used to log the message as a warning. Will send to LogStreams if Verbosity is Warn or Verbose.
     .PARAMETER IsError
         Used to log the message as an error. Will send to LogStreams if Verbosity is not Quiet.
         Terminates the process if $ErrorAction is not overridden.
     #>
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param (
         [Parameter(Position = 0, Mandatory = $true)]
         [string]$Message,
+        [hashtable]$Options,
         [switch]$IsError,
         [switch]$IsWarning
     )
 
+    if ($PSCmdlet.ShouldProcess("$($AugerContext.LogFile.Name)", 'Write to log file')) {
+        $Message | Add-Content -Path $AugerContext.LogFile.FullName
+    }
+
     $EnabledLogStreams = $AugerContext.LogStreams | Where-Object -Property Enabled -eq $true
 
     foreach ($stream in $EnabledLogStreams) {
-        $stream.Summary += "$Message`n"
+        if ($PSCmdlet.ShouldProcess("$($Stream.Name)", "Send log")) {
+            . $stream.Command $Message
+        }
     }
 
-#     if ($IsError) {
-#         Write-Error $Message
-#     }
-#     $InformationPreference = 'Continue'
-#     Write-Information $Message
+    if ($IsError) {
+        $ErrorActionPreference = 'Stop'
+        Write-Error $Message
+    } elseif ($IsWarning) {
+        Write-Warning $Message
+    } else {
+        $InformationPreference = 'Continue'
+        Write-Information $Message
+    }
 }
