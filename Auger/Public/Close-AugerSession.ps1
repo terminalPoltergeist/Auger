@@ -8,15 +8,26 @@ function Close-AugerSession {
     [CmdletBinding(SupportsShouldProcess)]
     param ()
     
-    $LogSummary = Get-Content -Path ($AugerContext.LogFile.FullName) -Raw
+    begin {
+        $LogSummary = Get-Content -Path ($AugerContext.LogFile.FullName)
 
-    $EnabledLogStreams = $AugerContext.LogStreams | Where-Object -Property Enabled -eq $true
-
-    foreach ($stream in $EnabledLogStreams) {
-        if ($PSCmdlet.ShouldProcess("$($Stream.Name)", "Send log summary")) {
-            if ($stream.LogType -eq 'Summary') {
-                . $stream.Command $LogSummary
+        $EnabledSummaryLogStreams = $AugerContext.LogStreams | Where-Object -Property Enabled -eq $true | Where-Object -Property LogType -eq 'Summary'
+    } process {
+        foreach ($stream in $EnabledSummaryLogStreams) {
+            if ($PSCmdlet.ShouldProcess("$($Stream.Name)", "Send log summary")) {
+                $FilteredSummary = $LogSummary
+                switch ($stream.Verbosity) {
+                'Error' {$FilteredSummary = $LogSummary | Select-String -Pattern '^(ERROR):.*$'}
+                'Warn' {$FilteredSummary = $LogSummary | Select-String -Pattern '^((WARN)|(ERROR)):.*$'}
+                'Verbose' {$FilteredSummary = $LogSummary}
+                default {$FilteredSummary = $LogSummary}
+                }
+                . $stream.Command ($FilteredSummary -join "`n")
             }
+        }
+    } end {
+        if ($PSCmdlet.ShouldProcess('$AugerContext', 'Clear')) {
+            Clear-AugerContext
         }
     }
 }
