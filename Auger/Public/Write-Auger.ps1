@@ -58,6 +58,7 @@ function Write-Auger {
     }
 
     if ($IsError) {
+        Close-AugerSession
         $ErrorActionPreference = 'Stop'
         Write-Error $Message
     } elseif ($IsWarning) {
