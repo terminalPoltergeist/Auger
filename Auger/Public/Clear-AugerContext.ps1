@@ -7,17 +7,20 @@ function Clear-AugerContext {
         Host            = $null
         Source          = $null
         LogFile         = $null
+        GUID            = $null
 
         LogStreams = @(
             [pscustomobject]@{
                 Name        = 'Email'
                 Enabled     = $false
                 Sender      = $null
+                Receiver    = $null
                 SMTPPort    = $null
                 SMTPCreds   = New-Object System.Net.NetworkCredential($null, $null)
                 SMTPSSL     = $true
                 Verbosity   = $null
                 LogType     = $null
+                Command     = 'Send-MailLog'
             }
             [pscustomobject]@{
                 Name        = 'Slack'
@@ -25,6 +28,7 @@ function Clear-AugerContext {
                 Webhook     = $null
                 Verbosity   = $null
                 LogType     = $null
+                Command     = 'Send-SlackLog'
             }
             [pscustomobject]@{
                 Name        = 'Splunk'
@@ -33,6 +37,7 @@ function Clear-AugerContext {
                 Headers     = $null
                 Verbosity   = $null
                 LogType     = $null
+                Command     = 'Send-SplunkLog'
             }
         )
     }

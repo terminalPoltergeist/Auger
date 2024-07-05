@@ -24,6 +24,7 @@ $AugerContext = [pscustomobject]@{
     Host            = $null
     Source          = $null
     LogFile         = $null
+    GUID            = $null
 
     LogStreams = @(
         [pscustomobject]@{

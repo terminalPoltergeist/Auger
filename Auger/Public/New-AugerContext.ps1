@@ -11,6 +11,8 @@ function New-AugerContext {
         Source of the logs. Used as metadata in some log streams.
         Can describe platform/infrastructure. ex. AzureRunbook, AzureFunction, Ansible, etc.
         Defaults to Auger.
+    .PARAMETER Id
+        A GUID for the logging session. Creates one if not provided.
     .PARAMETER SlackWebhook
         The http webhook endpoint for the Slack channel application.
     .PARAMETER SenderEmail
@@ -80,6 +82,8 @@ function New-AugerContext {
         [string]$Application,
 
         [string]$Source = 'Auger',
+
+        [guid]$Id = (New-Guid),
 
         [ValidateScript({
             if ($_ -notmatch '^[(http|https)://].*$') {
@@ -152,6 +156,9 @@ function New-AugerContext {
     $AugerContext.LogFile = New-TemporaryFile
     Write-Verbose "Created Auger log file at $($AugerContext.LogFile.FullName)"
 
+    $AugerContext.GUID = $Id
+    Write-Verbose "Auger session GUID: $Id"
+
     if ($LogVerbosity) {
         foreach ($stream in $AugerContext.LogStreams) {$stream.Verbosity = $LogVerbosity }
         Write-Verbose "Setting Auger default log verbosity [$LogVerbosity]"
@@ -218,4 +225,6 @@ function New-AugerContext {
             Write-Verbose "Setting Auger log stream [Splunk] log type [$SplunkLogType]"
         }
     }
+
+    Write-Auger "Auger session started at $(Get-Date) with ID $Id"
 }

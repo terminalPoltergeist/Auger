@@ -91,6 +91,7 @@ function Send-SplunkLog {
         }
         $internalEventData = $eventData | ConvertTo-Json | ConvertFrom-Json
         Add-Member -InputObject $internalEventData -Name "SplunkHECRetry" -Value $retryCount -MemberType NoteProperty
+        Add-Member -InputObject $internalEventData -Name "guid" -Value $AugerContext.GUID -MemberType NoteProperty
         $bodySplunk['event'] = $internalEventData
 
         $shouldProcessMessage = "Sending the following data to Splunk collector {0}:`n{1}" -f ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Splunk').URI, ($bodySplunk | ConvertTo-Json)

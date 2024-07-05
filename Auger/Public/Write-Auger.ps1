@@ -15,6 +15,11 @@ function Write-Auger {
     .PARAMETER IsError
         Used to log the message as an error. Will send to LogStreams if Verbosity is not Quiet.
         Terminates the process if $ErrorAction is not overridden.
+    .PARAMETER Force
+        Will send log to all streams even if LogType is Summary.
+    TODO:
+    - support advanced message types (pscustomobjects)
+      - convert to json string for log streams that expect strings
     #>
     [CmdletBinding(SupportsShouldProcess)]
     param (
@@ -22,7 +27,8 @@ function Write-Auger {
         [string]$Message,
         [hashtable]$Options,
         [switch]$IsError,
-        [switch]$IsWarning
+        [switch]$IsWarning,
+        [switch]$Force
     )
 
     if ($PSCmdlet.ShouldProcess("$($AugerContext.LogFile.Name)", 'Write to log file')) {
@@ -39,7 +45,7 @@ function Write-Auger {
 
     foreach ($stream in $EnabledLogStreams) {
         if ($PSCmdlet.ShouldProcess("$($Stream.Name)", "Send log")) {
-            if ($stream.LogType -eq 'AdHoc') {
+            if ($stream.LogType -eq 'AdHoc' -or $Force) {
                 switch ($stream.Verbosity) {
                 'Error' { if ($IsError) {. $stream.Command $Message} }
                 'Warn' { if ($IsWarning -or $IsError) {. $stream.Command $Message} }
