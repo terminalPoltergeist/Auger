@@ -26,6 +26,9 @@ function Send-SplunkLog {
         Event Data in hastable or pscustomeobject, will be comverted to JSON
     .PARAMETER JsonDepth
         Optional, specifies the Depth parameter to pass to ConvertTo-JSON, defaults to 100
+    .PARAMETER Severity
+        Info, Warn, or Error.
+        Labeling the log with a severity. Used to label the eventData body if message was given as a string.
     .EXAMPLE
         Send-SplunkEvent -SplunkAuthKey $secret -SourceType 'AzureRunbook' -EventData @{'JobID' = '123'; 'msg' = 'Init run'}
     #>
@@ -54,7 +57,10 @@ function Send-SplunkLog {
 
         [int]$SecondsDelay = 10,
 
-        [int]$JsonDepth = 100
+        [int]$JsonDepth = 100,
+
+        [ValidateSet('Info', 'Warn', 'Error')]
+        [string]$Severity = 'Info'
     )
 
     begin{
@@ -87,7 +93,7 @@ function Send-SplunkLog {
 
         # if string, convert to hashtable
         if ($EventData.GetType().Name -eq 'String') {
-            $EventData = @{'message' = $EventData}
+            $EventData = @{"$Severity" = $EventData}
         }
         $internalEventData = $eventData | ConvertTo-Json | ConvertFrom-Json
         Add-Member -InputObject $internalEventData -Name "SplunkHECRetry" -Value $retryCount -MemberType NoteProperty
