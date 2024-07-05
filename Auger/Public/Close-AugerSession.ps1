@@ -13,14 +13,14 @@ function Close-AugerSession {
 
         $EnabledSummaryLogStreams = $AugerContext.LogStreams | Where-Object -Property Enabled -eq $true | Where-Object -Property LogType -eq 'Summary'
     } process {
-        foreach ($stream in $EnabledSummaryLogStreams) {
+        :streams foreach ($stream in $EnabledSummaryLogStreams) {
             if ($PSCmdlet.ShouldProcess("$($Stream.Name)", "Send log summary")) {
                 $FilteredSummary = $LogSummary
                 switch ($stream.Verbosity) {
                 'Error' {$FilteredSummary = $LogSummary | Select-String -Pattern '^(ERROR):.*$'}
                 'Warn' {$FilteredSummary = $LogSummary | Select-String -Pattern '^((WARN)|(ERROR)):.*$'}
                 'Verbose' {$FilteredSummary = $LogSummary}
-                default {$FilteredSummary = $LogSummary}
+                default {continue streams}
                 }
                 . $stream.Command ($FilteredSummary -join "`n")
             }
