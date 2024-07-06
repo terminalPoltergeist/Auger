@@ -13,6 +13,7 @@ function Close-AugerSession {
 
         $EnabledSummaryLogStreams = $AugerContext.LogStreams | Where-Object -Property Enabled -eq $true | Where-Object -Property LogType -eq 'Summary'
     } process {
+        Write-Verbose "Summary: $($LogSummary -join "`n")"
         :streams foreach ($stream in $EnabledSummaryLogStreams) {
             if ($PSCmdlet.ShouldProcess("$($Stream.Name)", "Send log summary")) {
                 $FilteredSummary = $LogSummary
