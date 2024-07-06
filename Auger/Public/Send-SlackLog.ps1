@@ -22,5 +22,5 @@ Function Send-SlackLog {
         throw 'No webhook configured for Slack. Did you initialize $AugerContext?'
     }
 
-    $null = Invoke-RestMethod -uri $uri -Method Post -body $SlackBody -ContentType $ContentType
+    $null = Invoke-RestMethod -uri $uri -Method Post -body $SlackBody -ContentType $ContentType -TransferEncoding chunked
 }
