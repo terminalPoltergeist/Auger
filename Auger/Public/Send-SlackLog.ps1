@@ -14,6 +14,10 @@ Function Send-SlackLog {
         [string]$Body
     )
 
+    $headers = @{
+        'Content-Type' = 'application/json'
+        'Transfer-Encoding' = 'chunked'
+    }
     $ContentType= 'application/json'
     $SlackBody = "{ 'Body': '$body' }"
 
@@ -22,5 +26,5 @@ Function Send-SlackLog {
         throw 'No webhook configured for Slack. Did you initialize $AugerContext?'
     }
 
-    $null = Invoke-RestMethod -uri $uri -Method Post -body $SlackBody -ContentType $ContentType -TransferEncoding chunked
+    $null = Invoke-RestMethod -uri $uri -Method Post -body $SlackBody -Headers $headers
 }
