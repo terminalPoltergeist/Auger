@@ -2,6 +2,8 @@
 
 *The Powershell logging library designed for automation.*
 
+The benefit of Auger is you can write a single log command, `Write-Auger`, and it will format and forward your logs to a number of configurable log streams, aggregators, and indexers.
+
 <!-- {{{ TOC-->
 <details>
 <summary>Index</summary>
