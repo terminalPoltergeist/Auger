@@ -2,6 +2,8 @@ function Clear-AugerContext {
     [CmdletBinding()]
     param ()
 
+    Remove-Item $Script:AugerContext.LogFile.FullName
+
     $Script:AugerContext = [pscustomobject]@{
         Application     = $null
         Host            = $null

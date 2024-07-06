@@ -73,7 +73,7 @@ The $AugerContext.Host value is configured from the hostname of the system the l
 
 The $AugerContext.Source value can be used to differentiate environments or infrastructure your logs are coming from. Think Azure Runbooks, AWS EC2, Ansible, a self-hosted Kubernetes cluster, etc.
 
-The $AugerContext.LogFile stores a System.IO.FileInfo object. This file is created in your system's temp directory and is used by Auger to store an ephemeral summary of your logs.
+The $AugerContext.LogFile stores a System.IO.FileInfo object. This file is created in your system's temp directory and is used by Auger to store an ephemeral summary of your logs. The file is deleted when `Clear-AugerContext` is run; this includes `Close-AugerSession`.
 
 *Related: [LogStreams](#log-streams)*
 
