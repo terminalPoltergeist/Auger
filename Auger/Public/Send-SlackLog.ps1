@@ -19,6 +19,7 @@ Function Send-SlackLog {
         'Transfer-Encoding' = 'chunked'
     }
     $ContentType= 'application/json'
+    $body = $body.Replace("`n","\n")
     $SlackBody = "{ 'Body': '$body' }"
 
     $uri = ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Slack').Webhook
