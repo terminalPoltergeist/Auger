@@ -10,7 +10,7 @@ Function Send-SlackLog {
         Send-SlackLog -Body "This is an message."
     #>
     param (
-        [Parameter (Mandatory = $true)]
+        [Parameter (Mandatory = $true, Position = 0)]
         [string]$Body
     )
 
