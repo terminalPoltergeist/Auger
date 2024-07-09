@@ -10,6 +10,8 @@ function Close-AugerSession {
     
     begin {
         $LogSummary = Get-Content -Path ($AugerContext.LogFile.FullName)
+        # expand out multi-line logs from condensed single-line encoding
+        $LogSummary = $LogSummary.Replace("\n","`n")
 
         $EnabledSummaryLogStreams = $AugerContext.LogStreams | Where-Object -Property Enabled -eq $true | Where-Object -Property LogType -eq 'Summary'
     } process {
@@ -23,7 +25,9 @@ function Close-AugerSession {
                 'Verbose' {$FilteredSummary = $LogSummary}
                 default {continue streams}
                 }
-                . $stream.Command ($FilteredSummary -join "`n")
+                if ($FilteredSummary) {
+                    . $stream.Command ($FilteredSummary -join "`n")
+                }
             }
         }
     } end {

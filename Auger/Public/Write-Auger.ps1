@@ -32,12 +32,14 @@ function Write-Auger {
     )
 
     if ($PSCmdlet.ShouldProcess("$($AugerContext.LogFile.Name)", 'Write to log file')) {
+        # when writing to the log file, we need each entry to be on a single line. This joins multi-line logs with \n characters
+        $EncodedMessage = $Message.Replace("`n","\n")
         if ($IsError) {
-            ("ERROR: {0}" -f $Message) | Add-Content -Path $AugerContext.LogFile.FullName
+            ("ERROR: {0}" -f $EncodedMessage) | Add-Content -Path $AugerContext.LogFile.FullName
         } elseif ($IsWarning) {
-            ("WARN: {0}" -f $Message) | Add-Content -Path $AugerContext.LogFile.FullName
+            ("WARN: {0}" -f $EncodedMessage) | Add-Content -Path $AugerContext.LogFile.FullName
         } else {
-            ("INFO: {0}" -f $Message) | Add-Content -Path $AugerContext.LogFile.FullName
+            ("INFO: {0}" -f $EncodedMessage) | Add-Content -Path $AugerContext.LogFile.FullName
         }
     }
 
