@@ -20,6 +20,7 @@ function Write-Auger {
     TODO:
     - support advanced message types (pscustomobjects)
       - convert to json string for log streams that expect strings
+    - implement -IgnoreQuiet switch to send log to streams even if configured as quiet
     #>
     [CmdletBinding(SupportsShouldProcess)]
     param (
