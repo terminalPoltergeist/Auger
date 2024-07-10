@@ -37,7 +37,7 @@ Describe 'New-AugerContext' {
             Application = 'Pester'
             SlackWebhook = 'https://test.slack.nothing123'
             SlackVerbosity = 'Verbose'
-            SlackLogType = 'AdHoc'
+            SlackLogType = 'Summary'
         }
         New-AugerContext @params
         $ctx = Get-AugerContext
@@ -67,7 +67,7 @@ Describe 'New-AugerContext' {
             Application = 'Pester'
             SlackWebhook = 'https://test.slack.nothing123'
             SlackVerbosity = 'Verbose'
-            SlackLogType = 'AdHoc'
+            SlackLogType = 'Summary'
             SenderEmail = 'noone@test.com'
             SMTPCreds = New-Object System.Net.NetworkCredential('user', 'password')
             SplunkURI = 'https://test.splunk.webhook123'
