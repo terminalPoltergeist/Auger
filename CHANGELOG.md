@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [0.2.0] - 2024-07-10
+
+### Added
+
 - Add GUID property to AugerContext. ([`090daec`](https://github.com/terminalPoltergeist/Auger/commit/090daec4f27a895ac823a1daeead78173a283c06))
 - Support -Force param for Write-Auger. ([`090daec`](https://github.com/terminalPoltergeist/Auger/commit/090daec4f27a895ac823a1daeead78173a283c06))
 
@@ -21,12 +35,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Close-AugerSession to better format summary logs. ([`78961d8`](https://github.com/terminalPoltergeist/Auger/commit/78961d8820c3ea6c4079d5ed1e0b2384595ad3b8),[`9b77fb8`](https://github.com/terminalPoltergeist/Auger/commit/9b77fb8ef9a8180946290f23a07f17242547c781))
 - Write-Auger to encode log newlines as \\n characters when appending to the log file. ([`d76c8f6`](https://github.com/terminalPoltergeist/Auger/commit/d76c8f69c4048521f05840908b9d0f2a6e1468b2))
 
-### Deprecated
-
-### Removed
-
 ### Fixed
 
 - LogStreams with `Quiet` verbosity should not receive summaries. ([`8d11fdd`](https://github.com/terminalPoltergeist/Auger/commit/8d11fdd1caf3ef18b9bac92d58fdf6ad7c544753))
-
-### Security
