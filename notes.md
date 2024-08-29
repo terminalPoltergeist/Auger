@@ -1,0 +1,3 @@
+- Break out log-stream context configuration to individual "contexts".
+    - Avoids an ever expanding list of parameters to `New-AugerContext`.
+    - The `New-<LogStream>` command would initialize all necessary context for that log stream and add it to the AugerContext.
