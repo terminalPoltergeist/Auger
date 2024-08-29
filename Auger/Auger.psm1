@@ -20,25 +20,15 @@ foreach ($import in @($public + $private)) {
 
 # REGION module variables
 $AugerContext = [pscustomobject]@{
-    Application     = $null # required
-    Host            = $null
-    Source          = $null
-    LogFile         = $null
-    GUID            = $null
+    Application         = $null # required
+    Host                = $null
+    Source              = $null
+    LogFile             = $null
+    GUID                = $null
+    DefaultVerbosity    = $null
+    DefaultLogType      = $null
 
     LogStreams = @(
-        [pscustomobject]@{
-            Name        = 'Email'
-            Enabled     = $false
-            Sender      = $null
-            Receiver    = $null
-            SMTPPort    = $null
-            SMTPCreds   = New-Object System.Net.NetworkCredential($null, $null)
-            SMTPSSL     = $true
-            Verbosity   = $null
-            LogType     = $null
-            Command     = 'Send-MailLog'
-        }
         [pscustomobject]@{
             Name        = 'Slack'
             Enabled     = $false

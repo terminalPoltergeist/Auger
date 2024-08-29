@@ -15,16 +15,6 @@ function New-AugerContext {
         A GUID for the logging session. Creates one if not provided.
     .PARAMETER SlackWebhook
         The http webhook endpoint for the Slack channel application.
-    .PARAMETER SenderEmail
-        Email address to send automated messages from. Usually a service account like hosting-support@umn.edu.
-    .PARAMETER ReceiverEmail
-        Email address to send automated messages to.
-    .PARAMETER SMTPCreds
-        NetworkCredentials for authenticating with the SMTP server for sending email messages.
-    .PARAMETER SMTPPort
-        The port through which to send smtp traffic. Defaults to 587.
-    .PARAMETER SMTPSSL
-        Bool. Whether or not to use SSL for smtp transmission. Defaults to $true.
     .PARAMETER SplunkURI
         The http webhook endpoint for the Splunk collector.
     .PARAMETER SplunkAuthKey
@@ -52,21 +42,9 @@ function New-AugerContext {
         How to send logs to Slack.
         Summary sends the contents of $AugerContext.LogFile at the end of the log session (must use Close-AugerSession).
         AdHoc sends logs as they're recieved by Auger through Write-Auger.
-    .PARAMETER EmailVerbosity
-        Logging level for Email.
-
-        Quiet - No logging.
-        Error - Log fatal errors.
-        Warn - Log errors or potential errors that can be handled automatically.
-        Verbose - Send all logs to email.
-    .PARAMETER EmailLogType
-        How to send logs to email.
-        Summary sends the contents of $AugerContext.LogFile at the end of the log session (must use Close-AugerSession).
-        AdHoc sends logs as they're recieved by Auger through Write-Auger.
     .PARAMETER LogVerbosity
         Logging level to use for all output streams. Defaults to Error.
         Sets the default for all streams. Can be overridden by specifying a logging level for a given stream.
-        ie. '-LogVerbosity Verbose -EmailVerbosity Error' will use verbose logging to all output streams except Email, which will use Error logging.
 
         Quiet - No logging.
         Error - Log fatal errors.
@@ -98,34 +76,6 @@ function New-AugerContext {
 
         [ValidateSet('Summary', 'AdHoc')]
         [string]$SlackLogType,
-
-        [ValidateScript({
-            if ($_ -notmatch '^[a-zA-Z0-9\-]+@.*$') {
-                throw "Provided sender email [$_] is not a valid email."
-            }
-            return $true
-        })]
-        [string]$SenderEmail,
-
-        [ValidateScript({
-            if ($_ -notmatch '^[a-zA-Z0-9\-]+@.*$') {
-                throw "Provided sender email [$_] is not a valid email."
-            }
-            return $true
-        })]
-        [string]$ReceiverEmail,
-
-        [System.Net.NetworkCredential]$SMTPCreds,
-
-        [int]$SMTPPort = 587,
-
-        [bool]$SMTPSSL = $true,
-
-        [ValidateSet('Quiet', 'Error', 'Warn', 'Verbose')]
-        [string]$EmailVerbosity,
-
-        [ValidateSet('Summary', 'AdHoc')]
-        [string]$EmailLogType,
 
         [string]$SplunkURI,
 
@@ -160,36 +110,35 @@ function New-AugerContext {
     Write-Verbose "Auger session GUID: $Id"
 
     if ($LogVerbosity) {
-        foreach ($stream in $AugerContext.LogStreams) {$stream.Verbosity = $LogVerbosity }
+        $AugerContext.LogStreams.DefaultVerbosity = $LogVerbosity
         Write-Verbose "Setting Auger default log verbosity [$LogVerbosity]"
     }
 
     if ($LogType) {
-        foreach ($stream in $AugerContext.LogStreams) {
-            $stream.LogType = $LogType
-        }
+        $AugerContext.LogStreams.DefaultLogType = $LogType
         Write-Verbose "Setting Auger default log type [$LogType]"
     }
 
-    $enableEmail = $true
-    if ($SenderEmail) { ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').Sender = $SenderEmail } else { $enableEmail = $false }
-    if ($SMTPCreds) { ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').SMTPCreds = $SMTPCreds } else { $enableEmail = $false }
-    if ($enableEmail) {
-        if ($SMTPPort) { ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').SMTPPort = $SMTPPort }
-        if ($SMTPSSL) { ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').SMTPSSL = $SMTPSSL }
-        if ($ReceiverEmail) { ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').Receiver = $ReceiverEmail }
-        ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').Enabled = $true
-        Write-Verbose "Enabled Auger log stream [Email]"
+    # WARN: DEPRECATED. This functionality has been moved to the New-MailStream command.
+    # $enableEmail = $true
+    # if ($SenderEmail) { ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').Sender = $SenderEmail } else { $enableEmail = $false }
+    # if ($SMTPCreds) { ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').SMTPCreds = $SMTPCreds } else { $enableEmail = $false }
+    # if ($enableEmail) {
+    #     if ($SMTPPort) { ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').SMTPPort = $SMTPPort }
+    #     if ($SMTPSSL) { ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').SMTPSSL = $SMTPSSL }
+    #     if ($ReceiverEmail) { ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').Receiver = $ReceiverEmail }
+    #     ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').Enabled = $true
+    #     Write-Verbose "Enabled Auger log stream [Email]"
 
-        if ($EmailVerbosity) {
-            ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').Verbosity = $EmailVerbosity
-            Write-Verbose "Setting Auger log stream [Email] verbosity [$EmailVerbosity]"
-        }
-        if ($EmailLogType) {
-            ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').LogType = $EmailLogType
-            Write-Verbose "Setting Auger log stream [Email] log type [$EmailLogType]"
-        }
-    }
+    #     if ($EmailVerbosity) {
+    #         ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').Verbosity = $EmailVerbosity
+    #         Write-Verbose "Setting Auger log stream [Email] verbosity [$EmailVerbosity]"
+    #     }
+    #     if ($EmailLogType) {
+    #         ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').LogType = $EmailLogType
+    #         Write-Verbose "Setting Auger log stream [Email] log type [$EmailLogType]"
+    #     }
+    # }
 
     $enableSlack = $true
     if ($SlackWebhook) { ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Slack').Webhook = $SlackWebhook } else { $enableSlack = $false }

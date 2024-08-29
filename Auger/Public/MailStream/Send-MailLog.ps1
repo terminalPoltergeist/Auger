@@ -1,4 +1,4 @@
-Function Send-MailLog {
+function Send-MailLog {
     <#
     .SYNOPSIS
         Send a log to an email over SMTP.
@@ -7,7 +7,7 @@ Function Send-MailLog {
         It creates a new MailMessage object and sets the sender, recipient, subject, and body of the email.
         It then creates an SmtpClient object, sets the SMTP server details, enables SSL, sets the credentials, and sends the email.
     .PARAMETER To
-        The recipient email address. Defaults to the configured Receiver in the $AugerContext Email LogStream.
+        The recipient email address. Defaults to the configured Receiver in the $AugerContext Mail LogStream.
     .PARAMETER Subject
         The email subject line. Defaults to "$Severity: $Application from $Source on $Host".
         $Application, $Source, and $Host variables are configured in $AugerContext.
@@ -19,8 +19,8 @@ Function Send-MailLog {
     .EXAMPLE
        Send-MailLog -To "recipient@example.com" -subject "Test Email" -body "This is a test email."
     .NOTES
-       The function uses the SMTP server smtp.gmail.com on port 587 (or configured in the Email LogStream in $AugerContext).
-       The credentials for the SMTP server are configured in the Email LogStream in $AugerContext.
+       The function uses the SMTP server smtp.gmail.com on port 587 (or configured in the Mail LogStream in $AugerContext).
+       The credentials for the SMTP server are configured in the Mail LogStream in $AugerContext.
     #>
 
     param (
@@ -33,7 +33,7 @@ Function Send-MailLog {
             }
             return $true
         })]
-        [string]$To = (($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').Receiver),
+        [string]$To = (($AugerContext.LogStreams | Where-Object -Property Name -eq 'Mail').Receiver),
 
         [string]$Subject,
 
@@ -46,7 +46,7 @@ Function Send-MailLog {
     }
 
     $mail = New-Object System.Net.Mail.MailMessage
-    $mail.From = ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').Sender
+    $mail.From = ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Mail').Sender
 
     $mail.To.Add($to);
     if (-not $Subject) {
@@ -55,13 +55,13 @@ Function Send-MailLog {
     $mail.Subject = $Subject
     $mail.Body = $Body
 
-    if (($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').SMTPPort) {
-        $smtp = new-object Net.Mail.SmtpClient("smtp.gmail.com", ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').SMTPPort)
+    if (($AugerContext.LogStreams | Where-Object -Property Name -eq 'Mail').SMTPPort) {
+        $smtp = new-object Net.Mail.SmtpClient("smtp.gmail.com", ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Mail').SMTPPort)
     } else {
         $smtp = new-object Net.Mail.SmtpClient("smtp.gmail.com", "587")
     }
 
-    $smtp.EnableSSL = ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').SMTPSSL
-    $smtp.Credentials = ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Email').SMTPCreds
+    $smtp.EnableSSL = ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Mail').SMTPSSL
+    $smtp.Credentials = ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Mail').SMTPCreds
     $smtp.send($mail)
 }

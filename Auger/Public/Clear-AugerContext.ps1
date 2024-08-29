@@ -15,18 +15,6 @@ function Clear-AugerContext {
 
         LogStreams = @(
             [pscustomobject]@{
-                Name        = 'Email'
-                Enabled     = $false
-                Sender      = $null
-                Receiver    = $null
-                SMTPPort    = $null
-                SMTPCreds   = New-Object System.Net.NetworkCredential($null, $null)
-                SMTPSSL     = $true
-                Verbosity   = $null
-                LogType     = $null
-                Command     = 'Send-MailLog'
-            }
-            [pscustomobject]@{
                 Name        = 'Slack'
                 Enabled     = $false
                 Webhook     = $null
