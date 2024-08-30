@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [0.3.0-alpha.0] - 2024-08-29
+
+### Added
+
 - Global default verbosity and log type values to AugerContext. ([`1ab0907`](https://github.com/terminalPoltergeist/Auger/commit/1ab09075fb7780edf505f33673609e1bbead3abe))
 - New-MailStream and Remove-MailStream commands to inialize/delete mail streams. ([`1ab0907`](https://github.com/terminalPoltergeist/Auger/commit/1ab09075fb7780edf505f33673609e1bbead3abe))
 - New-SlackStream and Remove-SlackStream commands to inialize/delete slack streams. ([`c5b599e`](https://github.com/terminalPoltergeist/Auger/commit/c5b599ee90e6448438c8a8998bd9b96ef747c5be))
