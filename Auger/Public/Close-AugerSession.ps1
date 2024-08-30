@@ -26,7 +26,7 @@ function Close-AugerSession {
                 if ($FilteredSummary) {
                     # expand out multi-line logs from condensed single-line encoding and join each entry with a newline
                     $FormattedSummary = ($FilteredSummary -join "`n").Replace("\n","`n")
-                    . $stream.Command ($FormattedSummary)
+                    . $stream.Command ($FormattedSummary) -Stream $stream
                 }
             }
         }

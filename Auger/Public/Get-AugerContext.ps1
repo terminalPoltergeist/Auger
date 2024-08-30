@@ -1,3 +1,3 @@
 function Get-AugerContext {
-    return $AugerContext
+    return $AugerContext.PSObject.Copy()
 }

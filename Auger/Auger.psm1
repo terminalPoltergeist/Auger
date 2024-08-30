@@ -28,25 +28,7 @@ $AugerContext = [pscustomobject]@{
     DefaultVerbosity    = $null
     DefaultLogType      = $null
 
-    LogStreams = @(
-        [pscustomobject]@{
-            Name        = 'Slack'
-            Enabled     = $false
-            Webhook     = $null
-            Verbosity   = $null
-            LogType     = $null
-            Command     = 'Send-SlackLog'
-        }
-        [pscustomobject]@{
-            Name        = 'Splunk'
-            Enabled     = $false
-            Uri         = $null
-            Headers     = $null
-            Verbosity   = $null
-            LogType     = $null
-            Command     = 'Send-SplunkLog'
-        }
-    )
+    LogStreams = New-Object System.Collections.ArrayList
 }
 
 New-Variable -Name AugerContext -Value $AugerContext -Scope Script -Force

@@ -38,29 +38,51 @@ function Send-SplunkLog {
         [Parameter(Mandatory, Position=0)]
         $EventData,
 
-        [string]$Uri = ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Splunk').URI,
+        [Parameter(ParameterSetName="Custom", Mandatory=$true)]
+        [string]
+        $Uri,
 
-        [securestring]$SplunkAuthKey,
+        [Parameter(ParameterSetName="Custom")]
+        [securestring]
+        $SplunkAuthKey,
 
-        [hashtable]$Headers = @{},
+        [hashtable]
+        $Headers = @{},
 
-        [string]$Source = $AugerContext.Application,
+        [Parameter(ParameterSetName="Custom", Mandatory=$true)]
+        [Parameter(ParameterSetName="Stream")]
+        [string]
+        $Source = $AugerContext.Application,
 
-        [String]$SourceType = $AugerContext.Source,
+        [Parameter(ParameterSetName="Custom", Mandatory=$true)]
+        [Parameter(ParameterSetName="Stream")]
+        [String]
+        $SourceType = $AugerContext.Source,
 
+        [Parameter(ParameterSetName="Custom", Mandatory=$true)]
+        [Parameter(ParameterSetName="Stream")]
         [Alias("Host")]
-        [String]$EventHost = $AugerContext.Host,
+        [String]
+        $EventHost = $AugerContext.Host,
 
-        [hashtable]$Metadata,
+        [hashtable]
+        $Metadata,
 
-        [int]$Retries = 5,
+        [int]
+        $Retries = 5,
 
-        [int]$SecondsDelay = 10,
+        [int]
+        $SecondsDelay = 10,
 
-        [int]$JsonDepth = 100,
+        [int]
+        $JsonDepth = 100,
 
         [ValidateSet('Info', 'Warn', 'Error')]
-        [string]$Severity = 'Info'
+        [string]
+        $Severity = 'Info',
+
+        [Parameter(ParameterSetName="Stream", ValueFromPipeline)]
+        $Stream = ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Splunk')
     )
 
     begin{
@@ -68,52 +90,66 @@ function Send-SplunkLog {
         $completed = $false
         $response = $null
     } process {
-        if ((-not $Headers.Authorization)) {
-            if ((-not $SplunkAuthKey)) {
-                $Headers.Authorization = ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Splunk').Headers.Authorization
-            } else {
-                $Headers.Authorization = $SplunkAuthKey
+        if ($PSCmdlet.ParameterSetName -eq "Custom") {
+            if ((-not $Headers.Authorization) -and (-not $SplunkAuthKey)) { throw "No Splunk authorization token provided. Cannot send to Splunk." }
+            else { if ($SplunkAuthKey) { $Headers.Authorization = $SplunkAuthKey } }
+
+            # convert the securestring key for sending to Splunk
+            $Headers.Authorization = $([Net.NetworkCredential]::new('', $Headers.Authorization).Password)
+
+            # make local, temporary "stream" for custom execution
+            $Stream = [pscustomobject]@{
+                Name        = 'Splunk'
+                Enabled     = $true
+                Uri         = $Uri
+                Headers     = $Headers
             }
         }
 
-        if ($Headers.Authorization.Count -gt 1) {
-            $Headers.Authorization = $Headers.Authorization[0]
-            Write-Verbose "Send-SplunkLog multiple Authorization headers configured for [Splunk] selecting the first one."
-        } elseif ($Headers.Authorization.Count -lt 1) {
-            throw 'No Authorization header found. Did you initialize AugerContext? Or provide a $SplunkAuthKey'
-        }
+        foreach ($each in $Stream) {
+            if ((-not $Headers.Authorization)) { $Headers.Authorization = $each.Headers.Authorization }
 
-        # convert the securestring key for sending to Splunk
-        $Headers.Authorization = $([Net.NetworkCredential]::new('', $Headers.Authorization).Password)
+            if ($Headers.Authorization.Count -gt 1) {
+                $Headers.Authorization = $Headers.Authorization[0]
+                Write-Verbose "Send-SplunkLog multiple Authorization headers configured for [Splunk] selecting the first one."
+            } elseif ($Headers.Authorization.Count -lt 1) {
+                throw 'No Authorization header found. Did you initialize a SplunkStream? Or provide a $Headers'
+            }
 
-        if ($metadata){$bodySplunk = $metadata.Clone()}
-        else {$bodySplunk = @{'host' = $EventHost;'source' = $source;'sourcetype' = "HEC:$sourcetype"}}
+            # convert the securestring key for sending to Splunk
+            $Headers.Authorization = $([Net.NetworkCredential]::new('', $Headers.Authorization).Password)
 
-        $bodySplunk['time'] = (Get-Date).toUniversalTime() | Get-Date -UFormat %s
+            if ($metadata){$bodySplunk = $metadata.Clone()}
+            else {$bodySplunk = @{'host' = $EventHost;'source' = $source;'sourcetype' = "HEC:$sourcetype"}}
 
-        # if string, convert to hashtable
-        if ($EventData.GetType().Name -eq 'String') {
-            $EventData = @{"$Severity" = $EventData}
-        }
-        $internalEventData = $eventData | ConvertTo-Json | ConvertFrom-Json
-        Add-Member -InputObject $internalEventData -Name "SplunkHECRetry" -Value $retryCount -MemberType NoteProperty
-        Add-Member -InputObject $internalEventData -Name "guid" -Value $AugerContext.GUID -MemberType NoteProperty
-        $bodySplunk['event'] = $internalEventData
+            $bodySplunk['time'] = (Get-Date).toUniversalTime() | Get-Date -UFormat %s
 
-        $shouldProcessMessage = "Sending the following data to Splunk collector {0}:`n{1}" -f ($AugerContext.LogStreams | Where-Object -Property Name -eq 'Splunk').URI, ($bodySplunk | ConvertTo-Json)
-        if ($PSCmdlet.ShouldProcess($shouldProcessMessage, ($bodySplunk | ConvertTo-Json), "Send log to Splunk")) {
-            while (-not $completed) {
-                try {
-                    $response = Invoke-RestMethod -Uri $uri -Headers $Headers -UseBasicParsing -Body ($bodySplunk | ConvertTo-Json -Depth $JsonDepth) -Method Post
-                    if ($response.text -ne 'Success' -or $response.code -ne 0){throw "Failed to submit to Splunk HEC $($response)"}
-                    $completed = $true
-                } catch {
-                    if ($retrycount -ge $Retries) {
-                        throw
-                    } else {
-                        Start-Sleep $SecondsDelay
-                        $retrycount++
-                        $bodySplunk.event.SplunkHECRetry = $retryCount
+            # if string, convert to hashtable
+            if ($EventData.GetType().Name -eq 'String') {
+                $EventData = @{"$Severity" = $EventData}
+            }
+            $internalEventData = $eventData | ConvertTo-Json | ConvertFrom-Json
+            Add-Member -InputObject $internalEventData -Name "SplunkHECRetry" -Value $retryCount -MemberType NoteProperty
+            if ($PSCmdlet.ParameterSetName -eq "Stream") {
+                Add-Member -InputObject $internalEventData -Name "guid" -Value $AugerContext.GUID -MemberType NoteProperty
+            }
+            $bodySplunk['event'] = $internalEventData
+
+            $shouldProcessMessage = "Sending the following data to Splunk collector {0}:`n{1}" -f $each.URI, ($bodySplunk | ConvertTo-Json)
+            if ($PSCmdlet.ShouldProcess($shouldProcessMessage, ($bodySplunk | ConvertTo-Json), "Send log to Splunk")) {
+                while (-not $completed) {
+                    try {
+                        $response = Invoke-RestMethod -Uri $uri -Headers $Headers -UseBasicParsing -Body ($bodySplunk | ConvertTo-Json -Depth $JsonDepth) -Method Post
+                        if ($response.text -ne 'Success' -or $response.code -ne 0){throw "Failed to submit to Splunk HEC $($response)"}
+                        $completed = $true
+                    } catch {
+                        if ($retrycount -ge $Retries) {
+                            throw
+                        } else {
+                            Start-Sleep $SecondsDelay
+                            $retrycount++
+                            $bodySplunk.event.SplunkHECRetry = $retryCount
+                        }
                     }
                 }
             }

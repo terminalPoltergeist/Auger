@@ -12,25 +12,9 @@ function Clear-AugerContext {
         Source          = $null
         LogFile         = $null
         GUID            = $null
+        DefaultVerbosity= $null
+        DefaultLogType  = $null
 
-        LogStreams = @(
-            [pscustomobject]@{
-                Name        = 'Slack'
-                Enabled     = $false
-                Webhook     = $null
-                Verbosity   = $null
-                LogType     = $null
-                Command     = 'Send-SlackLog'
-            }
-            [pscustomobject]@{
-                Name        = 'Splunk'
-                Enabled     = $false
-                Uri         = $null
-                Headers     = $null
-                Verbosity   = $null
-                LogType     = $null
-                Command     = 'Send-SplunkLog'
-            }
-        )
+        LogStreams = @()
     }
 }
