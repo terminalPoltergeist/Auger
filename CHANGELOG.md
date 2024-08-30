@@ -35,15 +35,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Clearing AugerContext no longer uses null log streams. ([`c5b599e`](https://github.com/terminalPoltergeist/Auger/commit/c5b599ee90e6448438c8a8998bd9b96ef747c5be))
 - Get-AugerContext returns a copy instead of the object itself. ([`c5b599e`](https://github.com/terminalPoltergeist/Auger/commit/c5b599ee90e6448438c8a8998bd9b96ef747c5be))
 
-### Deprecated
-
-### Removed
-
 ### Fixed
 
 - Write-Auger without AugerContext erroring due to log file not existing. ([`c5b599e`](https://github.com/terminalPoltergeist/Auger/commit/c5b599ee90e6448438c8a8998bd9b96ef747c5be))
-
-### Security
 
 ## [0.2.0] - 2024-07-10
 
